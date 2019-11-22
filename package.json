@@ -1,0 +1,21 @@
+{
+  "name": "fac-factorial",
+  "version": "1.0.0",
+  "author": "maguri95",
+  "description": "API Posts to set schedule",
+  "private": true,
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.1",
+    "webpack-cli": "^3.3.10"
+  }
+}
