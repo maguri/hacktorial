@@ -2,24 +2,37 @@ const SATURDAY      = 6,
       SUNDAY        = 0,
       DEFAULT_CLOCK = [ {clock_in: '9:00', clock_out: '13:00'}, {clock_in: '14:00', clock_out: '18:00'} ]
 
-export class FacFactorial {
+export class Hacktorial {
   constructor(year, month, clock = null) {
-    this.year = year
-    this.month = month - 1
     this.clock = this.setClock(clock)
 
     this.getPeriod()
   }
 
   help() {
-    console.log('========HELP========')
+    console.log('================================HELP================================')
     console.log('Usage: new FacFactorial(year, month, clock)')
     console.log('Arguments:')
-    console.log('-year,  Year  [number] e.g. 2019')
-    console.log('-month, Month [number] e.g. 11 (November)')
-    console.log('-clock, Your schedule [Array of Hash] e.g.')
+    console.log('[OPTIONAL] -year,  Year  [number] e.g. 2019           DEFAULT => current year')
+    console.log('[OPTIONAL] -month, Month [number] e.g. 11 (November)  DEFAULT => current month')
+    console.log('[OPTIONAL] -clock, Your schedule [Array of Hash] e.g. DEFAULT =>')
     console.log(DEFAULT_CLOCK)
-    console.log('=====================')
+    console.log('run() - Post your shifts')
+    console.log('clean() - Clean your shifts')
+    console.log('=====================================================================')
+  }
+
+  run() {
+    if (this.period_id) {
+      this.setWeekdaysInMonth()
+    } else {
+      console.log('Wait, period id not set!')
+      console.log(`Check month: ${this.month} and year: ${this.year}.`)
+    }
+  }
+
+  clean() {
+    this.removeShifts()
   }
 
   setClock(clock) {
@@ -32,26 +45,25 @@ export class FacFactorial {
     if (clock.length === undefined || clock.length == 0)
       throw Error('Clock format must be a valid object e.g. ' + DEFAULT_CLOCK)
 
-      clock.forEach((time) => {
-        console.log('clock_in: ' + time.clock_in)
-        console.log('clock_out: ' + time.clock_out)
-      })
+    clock.forEach((time) => {
+      console.log('clock_in: ' + time.clock_in)
+      console.log('clock_out: ' + time.clock_out)
+    })
 
     this.clock = clock
-  }
-
-  run() {
-    if(this.period_id)
-      this.setWeekdaysInMonth()
-    else
-      console.log('Wait, period id not set!')
   }
 
   getPeriod() {
     fetch('https://api.factorialhr.com/attendance/periods/', { method: 'GET', credentials: 'include' }).then((response) => {
       response.text().then((content) => {
         let periods = JSON.parse(content)
-        this.period_id = periods[periods.length - 1].id
+        periods.forEach( (period) => {
+          if (period.month == this.month && period.year == this.year)
+            if (period.state == 'pending')
+              this.period_id = period.id
+            else
+              console.log(`Hey man!, you cannot update this month, period: ${period.state}` )
+        })
       })
     })
   }
@@ -59,17 +71,13 @@ export class FacFactorial {
   setWeekdaysInMonth() {
     let today = new Date().getDate()
 
-    for(let day = 1; day < today; day++) {
+    for(let day = 1; day <= today; day++) {
       if (this.isWeekday(day)) {
         this.clock.forEach((time) => {
           this.sendData(day, time.clock_in, time.clock_out)
         })
       }
     }
-  }
-
-  daysInMonth() {
-    return 32 - new Date(this.year, this.month, 32).getDate()
   }
 
   isWeekday(day) {
@@ -100,6 +108,18 @@ export class FacFactorial {
     }).then((response) => {
       response.text().then((content) => {
         console.log(content)
+      })
+    })
+  }
+
+  removeShifts() {
+    fetch('https://api.factorialhr.com/attendance/shifts', { method: 'GET', credentials: 'include' }).then((response) => {
+      response.text().then((content) => {
+        let shifts = JSON.parse(content)
+        shifts.forEach((shift) => {
+          if (shift.period_id == this.period)
+            fetch(`https://api.factorialhr.com/attendance/shifts/${shift.id}`, { method: 'DELETE', credentials: 'include' })
+        })
       })
     })
   }

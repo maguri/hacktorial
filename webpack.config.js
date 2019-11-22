@@ -1,10 +1,10 @@
 module.exports = {
   mode: 'production',
   entry: {
-    index: './src/facfactorial.js'
+    index: './src/hacktorial.js'
   },
   output: {
-    filename: 'facfactorial.min.js',
+    filename: 'hacktorial.min.js',
     path: __dirname + '/dist',
     library: undefined,
     libraryTarget: 'umd',
