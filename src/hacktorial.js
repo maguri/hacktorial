@@ -5,13 +5,15 @@ const SATURDAY      = 6,
 export class Hacktorial {
   constructor(year, month, clock = null) {
     this.clock = this.setClock(clock)
+    this.year = year
+    this.month = month
 
     this.getPeriod()
   }
 
   help() {
     console.log('================================HELP================================')
-    console.log('Usage: new FacFactorial(year, month, clock)')
+    console.log('Usage: new Hacktorial(year, month, clock)')
     console.log('Arguments:')
     console.log('[OPTIONAL] -year,  Year  [number] e.g. 2019           DEFAULT => current year')
     console.log('[OPTIONAL] -month, Month [number] e.g. 11 (November)  DEFAULT => current month')
@@ -81,9 +83,9 @@ export class Hacktorial {
   }
 
   isWeekday(day) {
-    let weekday = new Date(this.year, this.month, day).getDay()
+    let weekday = new Date(this.year, this.month -1, day).getDay()
 
-    return weekday !=SATURDAY && weekday !=SUNDAY
+    return (weekday != SATURDAY && weekday != SUNDAY)
   }
 
   sendData(day, clock_in, clock_out) {
@@ -107,6 +109,7 @@ export class Hacktorial {
       body: JSON.stringify(params)
     }).then((response) => {
       response.text().then((content) => {
+        console.log(`POST: { day: ${params.day}, month: ${this.month}, year: ${this.year}, time: { clock_in: ${params.clock_in}, clock_out: ${params.clock_out} }}`)
         console.log(content)
       })
     })
@@ -117,8 +120,11 @@ export class Hacktorial {
       response.text().then((content) => {
         let shifts = JSON.parse(content)
         shifts.forEach((shift) => {
-          if (shift.period_id == this.period)
+          if (shift.period_id == this.period_id) {
+            console.log('DELETE:')
+            console.log(shift)
             fetch(`https://api.factorialhr.com/attendance/shifts/${shift.id}`, { method: 'DELETE', credentials: 'include' })
+          }
         })
       })
     })
