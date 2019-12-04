@@ -3,10 +3,11 @@ const SATURDAY      = 6,
       DEFAULT_CLOCK = [ {clock_in: '9:00', clock_out: '13:00'}, {clock_in: '14:00', clock_out: '18:00'} ]
 
 export class Hacktorial {
-  constructor(year, month, clock = null) {
+  constructor(year, month, clock = null, holidays = []) {
     this.clock = this.setClock(clock)
-    this.year = year
-    this.month = month
+    this.year = year || new Date().getUTCFullYear()
+    this.month = month || new Date().getMonth() + 1
+    this.holidays = holidays
 
     this.getPeriod()
   }
@@ -15,12 +16,14 @@ export class Hacktorial {
     console.log('================================HELP================================')
     console.log('Usage: new Hacktorial(year, month, clock)')
     console.log('Arguments:')
-    console.log('[OPTIONAL] -year,  Year  [number] e.g. 2019           DEFAULT => current year')
-    console.log('[OPTIONAL] -month, Month [number] e.g. 11 (November)  DEFAULT => current month')
-    console.log('[OPTIONAL] -clock, Your schedule [Array of Hash] e.g. DEFAULT =>')
+    console.log('[OPTIONAL] Year  [Integer] e.g. 2019                 DEFAULT => current year')
+    console.log('[OPTIONAL] Month [Integer] e.g. 11 (November)        DEFAULT => current month')
+    console.log('[OPTIONAL] Your schedule [Array of Hash]             DEFAULT =>')
     console.log(DEFAULT_CLOCK)
-    console.log('run() - Post your shifts')
-    console.log('clean() - Clean your shifts')
+    console.log('[OPTIONAL] Holidays  [Array of Integers] e.g. [4, 5] DEFAULT => null')
+    console.log('Functions:')
+    console.log('run()\t - Post your shifts')
+    console.log('clean()\t - Clean your shifts')
     console.log('=====================================================================')
   }
 
@@ -76,7 +79,8 @@ export class Hacktorial {
     for(let day = 1; day <= today; day++) {
       if (this.isWeekday(day)) {
         this.clock.forEach((time) => {
-          this.sendData(day, time.clock_in, time.clock_out)
+          if (!this.holidays.includes(day))
+            this.sendData(day, time.clock_in, time.clock_out)
         })
       }
     }
